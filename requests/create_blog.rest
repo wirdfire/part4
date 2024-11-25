@@ -1,0 +1,10 @@
+POST http://localhost:3003/api/blogs 
+Content-Type: application/json 
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IndpcmRmaXJlIiwiaWQiOiI2NzJlN2JkNTg4OTJhYWI3MDQ4NDA4ZDQiLCJpYXQiOjE3MzI0NTYwMjEsImV4cCI6MTczMjQ1OTYyMX0.VlaGWYEJThaS47HvAPRgh7QIu8mCZtGDFYrHYL4Zvgc
+
+{
+"title": "It is extremely not good",
+"author": "Mike Tyson",
+"url": "http://youngestbillionairs.com",
+"likes": 53
+}

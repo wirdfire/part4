@@ -41,16 +41,20 @@ blogsRouter.post('/', middleware.tokenExtractor, middleware.userExtractor, async
 
 blogsRouter.get('/', async (request, response) => {
   const blogs = await Blog.find({}).populate('user', { username: 1, name: 1 })
+  response.json(blogs.map(blog => ({
+    ...blog.toObject(), id: blog._id.toString(),
 
-  response.json(blogs)
+  })))
 })
 
 
 blogsRouter.get('/:id', async (request, response) => {
-  const blog = await Blog.findById(request.params.id)
+  const blog = await Blog.findById(request.params.id).populate('user', { username: 1, name: 1 })
 
   if (blog) {
-    response.json(blog)
+    response.json({
+      ...blog.toObject(), id: blog._id.toString(),
+    })
   } else {
     response.status(404).end()
   }
@@ -73,28 +77,27 @@ blogsRouter.delete('/:id', middleware.tokenExtractor, middleware.userExtractor, 
   if (user.id.toString() !== blog.user.toString()) {
     return response.status(403).json({ error: 'user not authorized to delete this blog' })
   }
-
   await blog.deleteOne()
-
   user.blogs = user.blogs.filter(b => b.toString() !== blog._id.toString())
-
   await user.save()
-
   response.status(204).end()
 })
 
 
-blogsRouter.put('/:id', async (request, response) => {
-  const body = request.body
+blogsRouter.put('/:id', async (req, res) => {
+  const { id } = req.params
+  const { likes } = req.body
 
-  const blog = {
-    title: body.title,
-    author: body.author,
-    url: body.url,
-    likes: body.likes
+  const updatedBlog = await Blog.findByIdAndUpdate(
+    id,
+    { likes },
+    { new: true, runValidators: true, context: 'query' }
+  ).populate('user', { username: 1, name: 1 })
+
+  if (updatedBlog) {
+    res.json(updatedBlog)
+  } else {
+    res.status(404).send({ error: 'Blog not found' })
   }
-  const updatedBlog = await Blog.findByIdAndUpdate(request.params.id, blog, { new: true })
-  response.json(updatedBlog)
 })
-
 module.exports = blogsRouter
